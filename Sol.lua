@@ -21,10 +21,29 @@
 
 if not LibStub then return end
 
-local Sol = LibStub:NewLibrary('Sol-1.0', 0)
+local ADDON_NAME = 'Sol'
+
+local Sol = LibStub:NewLibrary(string.format('%s-1.0', ADDON_NAME), 0)
 if not Sol then return end
 
 local _G = getfenv(0)
+
+-- Error handler for more verbose error tracing
+local function ErrorHandler(msg)
+    local traces = { string.split('\n', debugstack()) }
+
+    local source = ''
+    for i = 1, select('#', unpack(traces)) do
+        if (not string.find(traces[i], ADDON_NAME) and
+            not string.find(traces[i], '%[C%]')) then
+            source = traces[i]
+            break
+        end
+    end
+
+    local parts = { string.split(':', msg) }
+    message(source .. ':' .. parts[3])
+end
 
 --[[
     Global empty function
@@ -51,6 +70,18 @@ end
     Table and indexing
 --]]
 string.match = string.match or function(str, pattern)
+    seterrorhandler(ErrorHandler)
+
+    local str_type = type(str)
+    assert(str_type == 'string',
+           string.format("bad argument #1 to `match' (string expected, got %s)", str_type))
+
+    str_type = type(pattern)
+    assert(str_type == 'string',
+           string.format("bad argument #2 to `match' (string expected, got %s)", str_type))
+
+    seterrorhandler(message)
+
     local tbl_res = { string.find(str, pattern) }
 
     if tbl_res[3] then
