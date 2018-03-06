@@ -24,6 +24,8 @@ if not LibStub then return end
 local Sol = LibStub:NewLibrary('Sol-1.0', 0)
 if not Sol then return end
 
+local _G = getfenv(0)
+
 --[[
     Global empty function
 --]]
@@ -136,7 +138,11 @@ select = select or function(idx, ...)
 end
 
 table.wipe = table.wipe or function(tbl)
-    for k in pairs(tbl) do
+    for i = table.getn(tbl), 1, -1 do
+        tremove(tbl, i)
+    end
+
+    for k in next, tbl do
         tbl[k] = nil
     end
 end
